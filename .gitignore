@@ -1,0 +1,8 @@
+*.txt
+*.pyc
+*.xml
+*.idea
+*.csv
+*.npy
+__init__2.py
+/Corpus
