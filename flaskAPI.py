@@ -8,6 +8,8 @@ from flask import after_this_request, request
 import gzip
 import functools
 from io import StringIO
+from flask_cors import CORS
+from flask_compress import Compress
 
 app = Flask(__name__)
 Compress(app)

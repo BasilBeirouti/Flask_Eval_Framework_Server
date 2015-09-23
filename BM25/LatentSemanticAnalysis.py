@@ -11,19 +11,24 @@ import matplotlib.pyplot as plt
 import scipy.sparse as ssp
 
 
-start = time.time()
-# doall("DataFolder/vnx2.csv", 2, 0.7, 20)
 
 class LSA:
 
     def __init__(self, *args, **kwargs):
-        self.traindirectory = args[0]
-        self.testdirectory = args[1]
-        self._itertrain = IterDocs(self.traindirectory)
-        self._itertest = TestDocs(self.testdirectory)
-        self.trainnames, self.traincontent = zip(*list(self._itertrain))
-        self.actualnames, self.qcontents = zip(*list(iter(self._itertest)))
+        self.traindata = args[0]
+        self.testdata = args[1]
+        self.trainnames, self.traincontent = zip(*self.traindata)
+        self.trainnames, self.traincontent = list(self.trainnames), list(self.traincontent)
+        testnames, testcontent = zip(*self.testdata)
+        self.actualnames, self.qcontents = list(testnames), list(testcontent)
         self.results = []
+        # self.traindirectory = args[0]
+        # self.testdirectory = args[1]
+        # self._itertrain = IterDocs(self.traindirectory)
+        # self._itertest = TestDocs(self.testdirectory)
+        # self.trainnames, self.traincontent = zip(*list(self._itertrain))
+        # self.actualnames, self.qcontents = zip(*list(iter(self._itertest)))
+        # self.results = []
 
 
         if "min_df" in kwargs:
@@ -66,19 +71,18 @@ class LSA:
         self.svder = TruncatedSVD(self.num_features, n_iter = 15)
         self.svdobj = self.svder.fit(self.vectout)
         self.svdout = self.svdobj.transform(self.vectout)
-        self.normer = Normalizer()
-        self.normobj = self.normer.fit(self.svdout)
-        self.normout = self.normobj.transform(self.svdout)
-        # self.normout = self.svdout
-        print(self.vectout.shape)
+        # self.normer = Normalizer()
+        # self.normobj = self.normer.fit(self.svdout)
+        # self.normout = self.normobj.transform(self.svdout)
+        self.normout = self.svdout
         print(self.svdout.shape)
         print(self.normout.shape)
 
     def transform(self):
         self.qvectsout = self.vectobj.transform(self.qcontents)
         self.qsvdsout = self.svdobj.transform(self.qvectsout)
-        self.qnormsout = self.normobj.transform(self.qsvdsout)
-        # self.qnormsout = self.qsvdsout
+        # self.qnormsout = self.normobj.transform(self.qsvdsout)
+        self.qnormsout = self.qsvdsout
         print(self.qnormsout.shape)
 
     def similarity(self):
