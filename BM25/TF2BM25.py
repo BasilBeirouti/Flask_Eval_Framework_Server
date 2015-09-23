@@ -1,6 +1,6 @@
 __author__ = 'BasilBeirouti'
 
-import numpy as numpy
+import numpy
 import os
 
 class Okapi:
@@ -40,9 +40,13 @@ class Okapi:
         return self.normtfs
 
     def make_bm25(self):
+        print("doing tfnorms")
         tfnorms = self.make_tfnorms()
+        print("doing idfs")
         idfs = self.makeidfs()
+        print("multiplying for final result")
         self.bm25 = numpy.multiply(tfnorms, idfs)
+        print("finished multiplying")
         return self.bm25
 
     # #returns same array memory mapped on disk
