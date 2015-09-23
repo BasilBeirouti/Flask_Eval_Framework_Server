@@ -7,6 +7,8 @@ from BM25.TextCleaning import wordslist2string, cleanStringAndLemmatize
 from BM25.LatentSemanticAnalysis import LSA
 from itertools import groupby
 
+
+combined =[]
 # data_vmax = csv_to_tups("RawData/sampleNoDialHome.csv")
 data_vnx = csv_to_tups("RawData/vnx2.csv")
 
@@ -22,30 +24,21 @@ def rand_divide(data, proportion):
     assert(numgroup2 == len(group2))
     return group1, group2
 
-# train1, test1 = rand_divide(data_vmax, 0.75)
-train2, test2 = rand_divide(data_vnx, 0.75)
+for ii in range(7):
+    # train1, test1 = rand_divide(data_vmax, 0.75)
+    train2, test2 = rand_divide(data_vnx, 0.75)
+    train = train2
+    test = test2
 
-# train = train1 + train2
-# test = test1 + test2
-train = train2
-test = test2
+    print("divided data into training and testing sets")
 
-print("divided data into training and testing sets")
+    tups_train = tuples_tse_psums_concat(train)
+    tups_train2 = tse_psums_concat(train)
 
-tups_train = tuples_tse_psums_concat(train)
-tups_train2 = tse_psums_concat(train)
-tups_test = tuples_tse_psums_concat(test)
-tups_test2 = tse_psums_concat(test)
+    print("grouped problem summaries by TSE")
 
-print("grouped problem summaries by TSE")
-
-evaluator = Bm25Eval(tups_train, tups_test)
-print("running evaluation")
-evaluator.evaluatealgorithm()
-
-print(len(tups_train))
-#
-# evaluator = LSA(tups_train, tups_test)
-# print("running evaluation")
-# evaluator.evaluatealgorithm()
+    evaluator = Bm25Eval(tups_train, test)
+    print("running evaluation")
+    evaluator.evaluatealgorithm()
+    combined.append(evaluator.results)
 
