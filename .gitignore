@@ -4,6 +4,7 @@
 *.idea
 *.csv
 *.npy
+*.pages
 __init__.py
 /Corpus
 /venv

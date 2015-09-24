@@ -2,6 +2,7 @@ __author__ = 'basilbeirouti'
 
 from DBConnect import BorgConnect
 import numpy as np
+import csv
 
 borg = BorgConnect()
 
@@ -64,3 +65,51 @@ def srdata(cur, *args, **kwargs):
     cur.execute(query_srdata)
     rows = cur.fetchall()
     return rows
+
+@borg.with_connection
+def getwork(cur, *args, **kwargs):
+    query_getwork = """
+    SELECT
+    DISTINCT SR.SRVC_REQ_NUM AS SR_NUM,
+    WPD.EMPL_BDGE_NUM AS SR_OWNER_PERSON_ID,
+    RSR.PERS_FULL_NM AS SR_OWNER,
+    SR.SRVC_REQ_PROB_TEXT AS PROBLEM_DESCRIPTION
+    FROM
+    EMCAS_ENGR_S360.W_SERVICE_REQUEST_D SR,
+    EMCAS_ENGR_S360.W_RESOURCE_ROLE_REF RSR,
+    EMCAS_ENGR_S360.W_PERSON_D WPD
+    WHERE
+    SR.SRVC_REQ_OWNR_RSRC_ID = RSR.RSRC_ID
+    AND
+    RSR.PERS_11I_ID = WPD.PERS_11I_ID
+    AND
+    SR.SRVC_REQ_CRTE_DT;
+        """
+    cur.execute(query_getwork)
+    with open("RawData/getwork.csv", 'wt') as csvfile:
+        spamwriter = csv.writer(csvfile)
+        for row in cur:
+            spamwriter.writerow(row)
+    cur.close()
+
+@borg.with_connection
+def getalltses(cur, *args, **kwargs):
+    query_getalltses = """
+    SELECT
+    DISTINCT PERSON.EMPL_BDGE_NUM AS PERSON_ID,
+    PERSON.PERS_FIRST_NM AS FIRST_NAME,
+    PERSON.PERS_LAST_NM AS LAST_NAME
+    FROM
+    EMCAS_ENGR_S360.W_PERSON_D AS PERSON
+    WHERE EMC_EMP_TYPE LIKE 'Employee'
+    AND PERSON.EMPL_BDGE_NUM is not NULL;
+"""
+    cur.execute(query_getalltses)
+    with open("RawData/getalltses.csv", 'wt') as csvfile:
+        spamwriter = csv.writer(csvfile)
+        for row in cur:
+            spamwriter.writerow(row)
+    cur.close()
+
+
+
