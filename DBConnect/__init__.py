@@ -7,17 +7,17 @@ class BorgConnect:
 
     _shared_state = {}
 
-    # _dbparams = {"dbname":"cps_dev01",
-    #              "user":"beirob",
-    #              "host":"cpsgpmtst01.isus.emc.com",
-    #              "password":"JU40QY82#1",
-    #              "port":"6200"}
-
     _dbparams = {"dbname":"cps_dev01",
-                 "user":"bracke",
-                 "host":"bdlgmcprd01.isus.emc.com",
-                 "password":"1",
-                 "port": "6400"}
+                 "user":"beirob",
+                 "host":"cpsgpmtst01.isus.emc.com",
+                 "password":"JU40QY82#1",
+                 "port":"6200"}
+
+    # _dbparams = {"dbname":"cps_dev01",
+    #              "user":"bracke",
+    #              "host":"bdlgmcprd01.isus.emc.com",
+    #              "password":"1",
+    #              "port": "6400"}
 
     def __init__(self):
         self.__dict__ = self._shared_state

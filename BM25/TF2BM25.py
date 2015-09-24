@@ -15,8 +15,8 @@ class Okapi:
 
     def makeidfs(self):
         docmatrix_boolean = self.docmatrix != 0
-        dfs = numpy.sum(docmatrix_boolean, axis = 0) #sum along the columns to get vect of len numterms, df for each term
-        idfs = numpy.divide(((self.numdocs-dfs) + 0.5), (dfs + 0.5))
+        dfs = numpy.sum(docmatrix_boolean, axis = 0) #sum along each column to get vect of len numterms, df for each term
+        idfs = numpy.log(numpy.divide(((self.numdocs-dfs) + 0.5), (dfs + 0.5)))
         idfs.reshape((1,self.numterms))
         self.idfs = idfs
         return self.idfs
