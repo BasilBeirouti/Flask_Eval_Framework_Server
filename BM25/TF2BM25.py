@@ -2,6 +2,7 @@ __author__ = 'BasilBeirouti'
 
 import numpy
 import os
+import time
 
 class OkapiWeights:
 
@@ -40,11 +41,10 @@ class OkapiWeights:
         return self.normtfs
 
     def make_bm25(self):
-        print("doing tfnorms")
+        start = time.time()
+        print("applying bm25 weights (OkapiWeights Class)")
         tfnorms = self.make_tfnorms()
-        print("doing idfs")
         idfs = self.makeidfs()
-        print("multiplying for final result")
         self.bm25 = numpy.multiply(tfnorms, idfs)
-        print("finished multiplying")
+        print("applying weights took ", time.time()-start, " seconds")
         return self.bm25

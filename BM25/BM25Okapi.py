@@ -2,9 +2,7 @@ __author__ = 'BasilBeirouti'
 
 from sklearn.feature_extraction.text import CountVectorizer
 from BM25 import TF2BM25
-import operator
-import os
-import numpy
+import operator, os, numpy, time
 
 class DocMatrix:
 
@@ -41,8 +39,11 @@ class DocMatrix:
         return self._bm_vectobj
 
     def vectorize_content(self, content):
+        print("building docmatrix (DocMatrix.vectorize_content method")
+        start = time.time()
         bm_vectout = self.vectorizer.transform(content)
         docmatrix = numpy.asarray(bm_vectout.toarray())
+        print("building docmatrix of size ", docmatrix.shape, " took ", time.time() - start)
         return docmatrix
 
     def onshift_docmatrix(self, tsesonshift = None):
@@ -66,7 +67,6 @@ class DocMatrix:
 
     @staticmethod
     def okapi_weights(docmatrix):
-        print("converting to BM25 representation")
         bm25obj = TF2BM25.OkapiWeights(docmatrix, 2, 1000, 0.75)
         bm25_docmatrix = bm25obj.make_bm25()
         return bm25_docmatrix
@@ -82,10 +82,13 @@ class QueryMaster:
 
 
     def similarity(self, current_docmatrix, qvect):
+        start = time.time()
+        print("calculating similarity (QueryMaster.similarity method)")
         matrixvectout = numpy.asmatrix(current_docmatrix)
         matrixqvectsout = numpy.asmatrix(qvect)
         print(matrixvectout.shape, matrixqvectsout.shape)
         similaritymatrix = numpy.asarray(matrixvectout*matrixqvectsout.T)
+        print("calculating similarity took ", time.time()-start, " seconds")
         return similaritymatrix
 
     def queryalgorithm(self, newquery, tsesonshift = None):
