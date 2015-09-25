@@ -15,11 +15,11 @@ class DocMatrix:
         if "bm25" in kwargs:
             self.bm25 = kwargs["bm25"]
             kwargs.pop("bm25")
-
-        self.mmap = True
-        if "mmap" in kwargs:
-            self.mmap = kwargs["mmap"]
-            kwargs.pop("mmap")
+        #
+        # self.mmap = True
+        # if "mmap" in kwargs:
+        #     self.mmap = kwargs["mmap"]
+        #     kwargs.pop("mmap")
 
         self.vectorizer = vectorizer
         if vectorizer is None:
@@ -142,11 +142,11 @@ class QueryMaster:
             topnindices = [ind[0] for ind in topnindices]
             return topnindices
 
-def mem_map_save(matrix, name):
-    path = os.path.join(os.getcwd(), "ApplicationData")
-    if os.path.exists(path):
-        filepath = path + "/" + name
-        print(filepath)
-        numpy.save(filepath, matrix)
-        matrix = numpy.load(filepath + ".npy", mmap_mode = "r")
-    return matrix
+# def mem_map_save(matrix, name):
+#     path = os.path.join(os.getcwd(), "ApplicationData")
+#     if os.path.exists(path):
+#         filepath = path + "/" + name
+#         print(filepath)
+#         numpy.save(filepath, matrix)
+#         matrix = numpy.load(filepath + ".npy", mmap_mode = "r")
+#     return matrix
