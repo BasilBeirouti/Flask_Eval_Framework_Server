@@ -81,11 +81,6 @@ class QueryMaster:
         """
         self.docmatrix_obj = docmatrix_obj
 
-    def queryalgorithm(self, newquery, tsesonshift = None):
-        current_docmatrix, recognized_tses = self.docmatrix_obj.onshift_docmatrix(tsesonshift)
-        qvect = self.docmatrix_obj.vectorize_content([newquery])
-        similaritymatrix = self.similarity(current_docmatrix, qvect)
-        return self.toppredictions(similaritymatrix, recognized_tses, similaritymatrix.shape[0])
 
     def similarity(self, current_docmatrix, qvect):
         matrixvectout = numpy.asmatrix(current_docmatrix)
@@ -93,12 +88,46 @@ class QueryMaster:
         similaritymatrix = numpy.asarray(matrixvectout*matrixqvectsout.T)
         return similaritymatrix
 
+    def queryalgorithm(self, newquery, tsesonshift = None):
+        current_docmatrix, recognized_tses = self.docmatrix_obj.onshift_docmatrix(tsesonshift)
+        qvect = self.docmatrix_obj.vectorize_content([newquery])
+        similaritymatrix = self.similarity(current_docmatrix, qvect)
+        return self.toppredictions(similaritymatrix, recognized_tses, similaritymatrix.shape[0])
+
+    def evaluatealgorithm(self, testdata, n):
+        testnames, testcontent = zip(*testdata)
+        actualnames, qcontents = list(testnames), list(testcontent)
+        qvect = self.docmatrix_obj.vectorize_content(qcontents)
+        current_docmatrix, all_tses = self.docmatrix_obj.onshift_docmatrix(None)
+        similaritymatrix = self.similarity(current_docmatrix, qvect)
+        return self.evaluatepredictions(similaritymatrix, all_tses, testnames, n)
+
     def toppredictions(self, similaritymatrix, recognized_tses, n = 1):
         topnindices = self.maxpoints(similaritymatrix, n)
         self.name_score = [(recognized_tses[ind], float("{0:.3f}".format(similaritymatrix[ind][0]))) for ind in topnindices]
         self.name_score.sort(key = operator.itemgetter(1), reverse = True)
         # print("algorithm predicts ", self.name_score)
         return self.name_score
+
+    def evaluatepredictions(self, similaritymatrix, trainnames, actualnames, n):
+        if n == 1:
+            out = numpy.argmax(similaritymatrix, axis = 0)
+            print(out.shape)
+            self.predictednames = [trainnames[ind] for ind in out]
+            bools1 = [self.predictednames[ii] == actualnames[ii] for ii in range(len(actualnames))]
+            accuracy = sum(bools1)/len(bools1)
+            randaccuracy = 1/len(trainnames)
+            print("algorithm achieved ", accuracy, " accuracy")
+            print("random achieved ", randaccuracy, " accuracy")
+            print((accuracy)/(randaccuracy), " times better than random!")
+        else:
+            topnindices = numpy.argpartition(similaritymatrix, -n, axis = 0)[-n:]
+            topnbools = [actualnames[ii] in set([trainnames[ind] for ind in topnindices[:, ii]]) for ii in range(topnindices.shape[1])]
+            accuracy = sum(topnbools)/len(topnbools)
+            randaccuracy = n/len(trainnames)
+            print("in top ", str(n), " algorithm achieved ", accuracy , " accuracy")
+            print("random achieved ", randaccuracy, " accuracy")
+            print(accuracy/randaccuracy, " times better than random!")
 
     @staticmethod
     def maxpoints(matrix, n):
