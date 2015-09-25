@@ -30,8 +30,8 @@ class DocMatrix:
         if self.bm25:
             self.docmatrix = self.okapi_weights(self.docmatrix)
 
-        if self.mmap:
-            self.docmatrix = mem_map_save(self.docmatrix, "docmatrix")
+        # if self.mmap:
+        #     self.docmatrix = mem_map_save(self.docmatrix, "docmatrix")
 
     def _make_vectorizer(self, traincontent, min_df = 2, ngrams_range = (1,1)):
         self._bm_vectorizer = CountVectorizer(traincontent, min_df = min_df, ngram_range= ngrams_range)
