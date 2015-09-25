@@ -1,8 +1,6 @@
 __author__ = 'BasilBeirouti'
 
-import numpy
-import os
-import time
+import numpy, os, time, scipy
 
 class OkapiWeights:
 

@@ -11,7 +11,7 @@ import cProfile
 
 
 data_vmax = csv_to_tups("RawData/sampleNoDialHome.csv")
-data_vnx = csv_to_tups("RawData/vnx2.csv")
+# data_vnx = csv_to_tups("RawData/vnx2.csv")
 
 def rand_divide(data, proportion):
     lendata = len(data)
@@ -26,9 +26,9 @@ def rand_divide(data, proportion):
     return group1, group2
 
 train1, test1 = rand_divide(data_vmax, 0.75)
-train2, test2 = rand_divide(data_vnx, 0.75)
-train = train1 + train2
-test = test1 + test2
+# train2, test2 = rand_divide(data_vnx, 0.75)
+train = train1
+test = test1
 
 print("divided data into training and testing sets")
 

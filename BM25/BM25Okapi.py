@@ -42,6 +42,7 @@ class DocMatrix:
         print("building docmatrix (DocMatrix.vectorize_content method)")
         start = time.time()
         bm_vectout = self.vectorizer.transform(content)
+        # docmatrix = bm_vectout
         docmatrix = numpy.asarray(bm_vectout.toarray())
         print("building docmatrix of size ", docmatrix.shape, " took ", time.time() - start)
         return docmatrix
