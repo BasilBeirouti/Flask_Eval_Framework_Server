@@ -60,7 +60,7 @@ class LSA:
         self.bm_vectorizer = CountVectorizer(self.traincontent, min_df = self.min_df, ngram_range= self.ngrams_range)
         self.bm_vectobj = self.vectorizer.fit(self.traincontent)
         self.bm_vectout = self.vectobj.transform(self.traincontent)
-        self.bm25obj = TF2BM25.Okapi(numpy.asarray(self.vectout.toarray()), 2, 1000, 0.75)
+        self.bm25obj = TF2BM25.OkapiWeights(numpy.asarray(self.vectout.toarray()), 2, 1000, 0.75)
         self.bm25 = self.bm25obj.make_bm25()
         self.bm25 = ssp.csr_matrix(self.bm25)
         self.vectout = self.bm25
