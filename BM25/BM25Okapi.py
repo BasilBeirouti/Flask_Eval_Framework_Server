@@ -1,11 +1,9 @@
 __author__ = 'BasilBeirouti'
 
-import numpy
 from sklearn.feature_extraction.text import CountVectorizer
 from BM25.DocIteration import IterDocs, TestDocs
 from BM25 import TF2BM25
-import operator
-
+import operator, os, numpy
 
 class Bm25Eval:
 
@@ -34,7 +32,7 @@ class Bm25Eval:
         self.bm_vectout = self.bm_vectobj.transform(self.traincontent)
         out = numpy.asarray(self.bm_vectout.toarray())
         print("converting to BM25 representation")
-        self.bm25obj = TF2BM25.Okapi(out, 2, 1000, 0.75)
+        self.bm25obj = TF2BM25.OkapiWeights(out, 2, 1000, 0.75)
         self.bm25 = self.bm25obj.make_bm25()
         self.vectout = self.bm25
         print("returned from BM25 conversion")
@@ -106,7 +104,7 @@ class Bm25Query:
         self.bm_vectobj = self.bm_vectorizer.fit(self.traincontent)
         self.bm_vectout = self.bm_vectobj.transform(self.traincontent)
         out = numpy.asarray(self.bm_vectout.toarray())
-        self.bm25obj = TF2BM25.Okapi(out, 2, 1000, 0.75)
+        self.bm25obj = TF2BM25.OkapiWeights(out, 2, 1000, 0.75)
         self.bm25 = self.bm25obj.make_bm25()
         self.vectout = self.bm25
 
@@ -147,86 +145,83 @@ class Bm25Query:
         self.similarity()
         return self.toppredictions(num)
 
-class OkapiDocMatrix:
+class DocMatrix:
 
-    def __init__(self, *args, **kwargs):
-        data = args[0]
-        trainnames, traincontent = self.unpack_corpus(data)
-        self.vectorizer = self._make_vectorizer(traincontent, **kwargs)
-        docmatrix = self.vectorize_content(traincontent)
-        bm25_docmatrix = self.okapi_weights(docmatrix)
-        bm25_docmatrix = self.mem_map(bm25_docmatrix, "bm25_docmatrix.npy")
+    def __init__(self, data_tuples, vectorizer = None, **kwargs):
+        trainnames, traincontent = self.unpack_corpus(data_tuples)
         self.tse_dict = self.make_tse_dict(trainnames)
-        self.bm25_docmatrix = DocMatrix(bm25_docmatrix, self.tse_dict)
+        self.tse_list = trainnames
 
-    def _make_vectorizer(self, traincontent, **kwargs):
-        if "min_df" in kwargs:
-            self._min_df = kwargs["min_df"]
-        else:
-            self._min_df = 2
+        self.bm25 = False
+        if "bm25" in kwargs:
+            self.bm25 = kwargs["bm25"]
+            kwargs.pop("bm25")
 
-        if "ngrams_range" in kwargs:
-            self._ngrams_range = kwargs["ngrams_range"]
-        else:
-            self._ngrams_range = (1,1)
-        self._bm_vectorizer = CountVectorizer(traincontent, min_df = self._min_df, ngram_range= self._ngrams_range)
+        self.mmap = True
+        if "mmap" in kwargs:
+            self.mmap = kwargs["mmap"]
+            kwargs.pop("mmap")
+
+        self.vectorizer = vectorizer
+        if vectorizer is None:
+            self.vectorizer = self._make_vectorizer(traincontent, **kwargs)
+
+        self.docmatrix = self.vectorize_content(traincontent)
+
+        if self.bm25:
+            self.docmatrix = self.okapi_weights(self.docmatrix)
+
+        if self.mmap:
+            self.docmatrix = mem_map_save(self.docmatrix, "docmatrix")
+
+    def _make_vectorizer(self, traincontent, min_df = 2, ngrams_range = (1,1)):
+        self._bm_vectorizer = CountVectorizer(traincontent, min_df = min_df, ngram_range= ngrams_range)
         self._bm_vectobj = self._bm_vectorizer.fit(traincontent)
         return self._bm_vectobj
 
     def vectorize_content(self, content):
-        docmatrix = self.transform_matrix(self.vectorizer, content)
-        return docmatrix
-
-    @staticmethod
-    def unpack_corpus(data):
-        names, content = zip(*data)
-        names, content = list(names), list(content)
-        return names, content
-
-    @staticmethod
-    def transform_matrix(vectorizer, content):
-        bm_vectout = vectorizer.transform(content)
+        bm_vectout = self.vectorizer.transform(content)
         docmatrix = numpy.asarray(bm_vectout.toarray())
         return docmatrix
 
-    @staticmethod
-    def okapi_weights(docmatrix):
-        print("converting to BM25 representation")
-        bm25obj = TF2BM25.Okapi(docmatrix, 2, 1000, 0.75)
-        bm25_docmatrix = bm25obj.make_bm25()
-        return bm25_docmatrix
+    def onshift_docmatrix(self, tsesonshift = None):
+        if tsesonshift is None:
+            return self.docmatrix, self.tse_list
+        recognized_tses = [tse for tse in tsesonshift if tse in self.tse_dict]
+        rownums = [self.tse_dict[tse] for tse in recognized_tses]
+        return self.docmatrix[rownums,:], recognized_tses
 
     @staticmethod
-    def mem_map(matrix, filename):
-        numpy.save(filename, matrix)
-        return numpy.load(filename, mmap_mode = "r")
+    def unpack_corpus(data):
+        data.sort(key = operator.itemgetter(0))
+        names, content = zip(*data)
+        names, content = list(names), list(content)
+        return names, content
 
     @staticmethod
     def make_tse_dict(trainnames):
         nums, names = zip(*enumerate(trainnames))
         return dict(list(zip(names, nums)))
 
-class DocMatrix:
-
-    def __init__(self, docmatrix, tse_dict):
-        self.docmatrix = docmatrix
-        self.tse_dict = tse_dict
-
-    def onshift_docmatrix(self, tsesonshift):
-        recognized_tses = [tse for tse in tsesonshift if tse in self.tse_dict]
-        rownums = [self.tse_dict[tse] for tse in recognized_tses]
-        return self.docmatrix[rownums,:], recognized_tses
+    @staticmethod
+    def okapi_weights(docmatrix):
+        print("converting to BM25 representation")
+        bm25obj = TF2BM25.OkapiWeights(docmatrix, 2, 1000, 0.75)
+        bm25_docmatrix = bm25obj.make_bm25()
+        return bm25_docmatrix
 
 class QueryMaster:
-    #okapi_docmatrix must implement transform, contain docmatrix, and contain TSE dictionary identifying TSE corresponding to each row of docmatrix.
-    #only vocab known by okapi_docmatrix will be vectorized
-    def __init__(self, okapi_docmatrix):
-        self.okapi_docmatrix = okapi_docmatrix
 
-    def queryalgorithm(self, newquery, tsesonshift):
-        current_docmatrix, recognized_tses = self.okapi_docmatrix.bm25_docmatrix.onshift_docmatrix(tsesonshift)
-        qvect = self.okapi_docmatrix.vectorize_content([newquery])
-        print(sum(list(qvect)))
+    def __init__(self, docmatrix_obj):
+        """
+        :param docmatrix_obj: numpy matrix representing corpus. shape: (numtses, numwords)
+        :type docmatrix_obj: numpy.ndarray
+        """
+        self.docmatrix_obj = docmatrix_obj
+
+    def queryalgorithm(self, newquery, tsesonshift = None):
+        current_docmatrix, recognized_tses = self.docmatrix_obj.onshift_docmatrix(tsesonshift)
+        qvect = self.docmatrix_obj.vectorize_content([newquery])
         similaritymatrix = self.similarity(current_docmatrix, qvect)
         return self.toppredictions(similaritymatrix, recognized_tses, similaritymatrix.shape[0])
 
@@ -255,3 +250,9 @@ class QueryMaster:
             topnindices = [ind[0] for ind in topnindices]
             return topnindices
 
+def mem_map_save(matrix, name):
+    path = os.path.join(os.getcwd(),"ApplicationData")
+    if os.path.exists(path):
+        numpy.save(path + name + ".npy", matrix)
+        matrix = numpy.load(path + name + ".npy", mmap_mode = "r")
+    return matrix

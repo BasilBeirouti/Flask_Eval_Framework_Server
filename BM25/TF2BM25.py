@@ -3,7 +3,7 @@ __author__ = 'BasilBeirouti'
 import numpy
 import os
 
-class Okapi:
+class OkapiWeights:
 
     def __init__(self, docmatrix, k1, k3, b):
         self.docmatrix = docmatrix
@@ -48,17 +48,3 @@ class Okapi:
         self.bm25 = numpy.multiply(tfnorms, idfs)
         print("finished multiplying")
         return self.bm25
-
-    # #returns same array memory mapped on disk
-    # def tempsave(self, array, namestring):
-    #     filename = "temp" + namestring
-    #     try:
-    #         numpy.save(array, filename)
-    #     except AttributeError:
-    #         array = array.astype(numpy.float64, subok = False)
-    #         numpy.save(array, filename)
-    #     del array
-    #     array = numpy.load(filename, mmap_mode = "r")
-    #     return array
-
-
