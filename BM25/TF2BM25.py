@@ -14,7 +14,7 @@ class OkapiWeights:
 
     def makeidfs(self):
         docmatrix_boolean = self.docmatrix != 0
-        dfs = numpy.sum(docmatrix_boolean, axis = 0) #sum along each column to get vect of len numterms, df for each term
+        dfs = docmatrix_boolean.sum(axis = 0) #sum along each column to get vect of len numterms, df for each term
         idfs = numpy.log(numpy.divide(((self.numdocs-dfs) + 0.5), (dfs + 0.5)))
         idfs.reshape((1,self.numterms))
         self.idfs = idfs
@@ -22,12 +22,12 @@ class OkapiWeights:
 
     def make_primes(self):
         docmatrix = self.docmatrix
-        self.doclengths = numpy.sum(docmatrix, axis = 1) #sum along columns to get 1d array of length of each document
+        self.doclengths = docmatrix.sum(axis = 1) #sum along columns to get 1d array of length of each document
         self.avglen = sum(self.doclengths)/len(self.doclengths)
         factors = numpy.asarray([1/(1-self.b + self.b * doclength/self.avglen) for doclength in self.doclengths]) #numdocs 1d array
         factors = numpy.reshape(factors, (factors.shape[0], 1))
         docmatrix = self.docmatrix
-        primes = docmatrix*factors
+        primes = docmatrix.multiply(factors)
         self.primes = primes
         return self.primes
 

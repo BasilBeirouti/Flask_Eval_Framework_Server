@@ -42,9 +42,9 @@ class DocMatrix:
         print("building docmatrix (DocMatrix.vectorize_content method)")
         start = time.time()
         bm_vectout = self.vectorizer.transform(content)
-        # docmatrix = bm_vectout
-        docmatrix = numpy.asarray(bm_vectout.toarray())
-        print("building docmatrix of size ", docmatrix.shape, " took ", time.time() - start)
+        docmatrix = bm_vectout
+        # docmatrix = numpy.asarray(bm_vectout.toarray())
+        print("building docmatrix of size ", docmatrix.shape, " took ", time.time() - start, "\n")
         return docmatrix
 
     def onshift_docmatrix(self, tsesonshift = None):
@@ -85,13 +85,10 @@ class QueryMaster:
     def similarity(self, current_docmatrix, qvect):
         print("calculating similarity (QueryMaster.similarity method)")
         start = time.time()
-        print(type(current_docmatrix), type(qvect))
         matrixvectout = numpy.asmatrix(current_docmatrix)
-        matrixqvectsout = numpy.asmatrix(qvect)
-        print(matrixvectout.shape, matrixqvectsout.shape)
         #NEED TO OPTIMIZE THIS LINE RIGHT BELOW!!!
-        similaritymatrix = numpy.asarray(matrixvectout*matrixqvectsout.T)
-        print("calculating similarity took ", time.time()-start, " seconds")
+        similaritymatrix = numpy.asarray(qvect.dot(matrixvectout.T).T)
+        print("calculating similarity took ", time.time()-start, " seconds",  "\n")
         return similaritymatrix
 
     def queryalgorithm(self, newquery, tsesonshift = None):
@@ -118,14 +115,13 @@ class QueryMaster:
     def evaluatepredictions(self, similaritymatrix, trainnames, actualnames, n):
         if n == 1:
             out = numpy.argmax(similaritymatrix, axis = 0)
-            print(out.shape)
             self.predictednames = [trainnames[ind] for ind in out]
             bools1 = [self.predictednames[ii] == actualnames[ii] for ii in range(len(actualnames))]
             accuracy = sum(bools1)/len(bools1)
             randaccuracy = 1/len(trainnames)
             print("algorithm achieved ", accuracy, " accuracy")
             print("random achieved ", randaccuracy, " accuracy")
-            print((accuracy)/(randaccuracy), " times better than random!")
+            print((accuracy)/(randaccuracy), " times better than random! \n")
         else:
             topnindices = numpy.argpartition(similaritymatrix, -n, axis = 0)[-n:]
             topnbools = [actualnames[ii] in set([trainnames[ind] for ind in topnindices[:, ii]]) for ii in range(topnindices.shape[1])]
@@ -133,7 +129,7 @@ class QueryMaster:
             randaccuracy = n/len(trainnames)
             print("in top ", str(n), " algorithm achieved ", accuracy , " accuracy")
             print("random achieved ", randaccuracy, " accuracy")
-            print(accuracy/randaccuracy, " times better than random!")
+            print(accuracy/randaccuracy, " times better than random! \n")
 
     @staticmethod
     def maxpoints(matrix, n):
