@@ -129,7 +129,6 @@ class Bm25Query:
 
         elif n > 1:
             topnindices = numpy.argpartition(matrix, -n, axis = 0)[-n:]
-            print(topnindices)
             topnindices = [ind[0] for ind in topnindices]
             return topnindices
 
@@ -246,17 +245,14 @@ class QueryMaster:
 
         elif n > 1:
             topnindices = numpy.argpartition(matrix, -n, axis = 0)[-n:]
-            print(topnindices)
             topnindices = [ind[0] for ind in topnindices]
             return topnindices
 
 def mem_map_save(matrix, name):
     path = os.path.join(os.getcwd(), "ApplicationData")
     if os.path.exists(path):
-        print("inside")
         filepath = path + "/" + name
         print(filepath)
         numpy.save(filepath, matrix)
-        print("after save")
         matrix = numpy.load(filepath + ".npy", mmap_mode = "r")
     return matrix
