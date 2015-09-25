@@ -1,33 +1,44 @@
 SELECT
-  DISTINCT WPD.EMPL_BDGE_NUM AS PERSON_ID,
-  SHIFT.UTC_DATE AS SHIFT_START_DATE,
-  SHIFT.MINS AS SHIFT_DURATION
-FROM EMCAS_ENGR_S360.GLOBAL_SCHEDULER_SHIFT SHIFT
-  JOIN EMCAS_ENGR_S360.W_PERSON_D WPD ON SHIFT.PERSON_ID = WPD.PERS_11I_ID
+  DISTINCT wpd.empl_bdge_num as person_id,
+  shift.utc_date as shift_start_date,
+  shift.mins as shift_duration
+FROM emcas_engr_s360.global_scheduler_shift shift
+  JOIN emcas_engr_s360.w_person_d wpd on shift.person_id = wpd.pers_11i_id
 WHERE
-  (SHIFT.UTC_DATE, SHIFT.UTC_DATE + CAST(SHIFT.MINS/60-1 || 'HOURS' AS INTERVAL))
+  (shift.utc_date, shift.utc_date + cast(shift.mins/60-1 || 'hours' AS INTERVAL))
   OVERLAPS
-  (NOW()::TIMESTAMP, NOW()::TIMESTAMP)
+  (now()::TIMESTAMP, now()::TIMESTAMP)
 LIMIT 10;
 
 SELECT
-  DISTINCT SR.SRVC_REQ_NUM AS SR_NUM,
-  WPD.EMPL_BDGE_NUM AS SR_OWNER_PERSON_ID,
-  RSR.PERS_FIRST_NM AS FIRST_NAME,
-  RSR.PERS_LAST_NM as LAST_NAME,
-  SR.SRVC_REQ_PROB_TEXT AS PROBLEM_DESCRIPTION,
-  SR.SRVC_REQ_CRTE_DT
+  DISTINCT person.empl_bdge_num as person_id,
+  person.pers_first_nm as first_name,
+  person.pers_last_nm as last_name
 FROM
-  EMCAS_ENGR_S360.W_SERVICE_REQUEST_D AS SR,
-  EMCAS_ENGR_S360.W_RESOURCE_ROLE_REF AS RSR,
-  EMCAS_ENGR_S360.W_PERSON_D AS WPD
+  emcas_engr_s360.w_person_d as person
 WHERE
-  SR.SRVC_REQ_OWNR_RSRC_ID = RSR.RSRC_ID AND
-  WPD.EMPL_BDGE_NUM != 'NA' AND
-  RSR.PERS_11I_ID = WPD.PERS_11I_ID AND
-  SR.SRVC_REQ_CRTE_DT > NOW()::timestamp - CAST(365 || 'DAYS' AS INTERVAL)
+  emc_emp_type LIKE 'Employee' and
+  person.empl_bdge_num is not NULL
+LIMIT 1000;
+
+SELECT
+  DISTINCT sr.srvc_req_num as sr_num,
+  wpd.empl_bdge_num as sr_owner_person_id,
+  rsr.pers_first_nm as first_name,
+  rsr.pers_last_nm as last_name,
+  sr.srvc_req_prob_text as problem_description,
+  sr.srvc_req_crte_dt
+FROM
+  emcas_engr_s360.w_service_request_d as sr,
+  emcas_engr_s360.w_resource_role_ref as rsr,
+  emcas_engr_s360.w_person_d as wpd
+WHERE
+  sr.srvc_req_ownr_rsrc_id = rsr.rsrc_id and
+  wpd.empl_bdge_num != 'na' and
+  rsr.pers_11i_id = wpd.pers_11i_id and
+  sr.srvc_req_crte_dt > now()::TIMESTAMP - cast(365 || 'days' as INTERVAL)
 ORDER BY
   SR.srvc_req_crte_dt,
-  SR_OWNER_PERSON_ID
+  sr_owner_person_id
 LIMIT 1000;
 
