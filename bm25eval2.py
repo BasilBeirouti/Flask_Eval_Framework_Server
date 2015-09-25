@@ -7,6 +7,7 @@ import time, sys, random
 from BM25.TextCleaning import wordslist2string, cleanStringAndLemmatize
 from BM25.LatentSemanticAnalysis import LSA
 from itertools import groupby
+import cProfile
 
 
 data_vmax = csv_to_tups("RawData/sampleNoDialHome.csv")
@@ -36,11 +37,18 @@ tups_train2 = tse_psums_concat(train)
 
 print("grouped problem summaries by TSE")
 
-evaluator = Bm25Eval(tups_train, test)
-print("running evaluation")
-evaluator.evaluatealgorithm()
+# evaluator = Bm25Eval(tups_train, test)
+# print("running evaluation")
+# evaluator.evaluatealgorithm()
 
-okapi_docmatrix = DocMatrix(tups_train, bm25 = True, ngrams_range = (1,1))
-query_master = QueryMaster(okapi_docmatrix)
-query_master.evaluatealgorithm(test, 1)
-query_master.evaluatealgorithm(test, 10)
+def testfunction():
+    okapi_docmatrix = DocMatrix(tups_train, bm25 = True, mmap = False, ngrams_range = (1,1))
+    query_master = QueryMaster(okapi_docmatrix)
+    query_master.evaluatealgorithm(test, 1)
+    query_master.evaluatealgorithm(test, 10)
+
+# cProfile.runctx("testfunction()", globals(), locals())
+start = time.time()
+testfunction()
+stop = time.time()
+tot = stop - start
