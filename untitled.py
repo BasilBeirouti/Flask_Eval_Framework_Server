@@ -3,7 +3,7 @@ import json
 from flask import Flask, Response, request
 
 from BM25.TextCleaning import cleanStringAndLemmatize, wordslist2string, changeback
-from BM25.BM25Okapi import Bm25Query
+from BM25.Deprecated import Bm25Query
 from bm25test import temp
 
 app = Flask(__name__)

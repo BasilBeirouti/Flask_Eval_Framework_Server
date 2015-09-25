@@ -1,6 +1,6 @@
 __author__ = 'basil.beirouti'
 
-from BM25.BM25Okapi import Bm25Query
+from BM25.Deprecated import Bm25Query
 from BM25.Plugins import csv_to_tups, tuples_tse_psums_concat
 from BM25.TextCleaning import wordslist2string, cleanStringAndLemmatize
 import sys, time
