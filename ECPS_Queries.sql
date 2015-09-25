@@ -34,11 +34,11 @@ FROM
   emcas_engr_s360.w_person_d as wpd
 WHERE
   sr.srvc_req_ownr_rsrc_id = rsr.rsrc_id and
-  wpd.empl_bdge_num != 'na' and
+  wpd.empl_bdge_num != 'NA' and
   rsr.pers_11i_id = wpd.pers_11i_id and
   sr.srvc_req_crte_dt > now()::TIMESTAMP - cast(365 || 'days' as INTERVAL)
 ORDER BY
-  SR.srvc_req_crte_dt,
+  SR.srvc_req_crte_dt DESC,
   sr_owner_person_id
 LIMIT 1000;
 
