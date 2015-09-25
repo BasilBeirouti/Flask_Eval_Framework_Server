@@ -42,7 +42,7 @@ print("grouped problem summaries by TSE")
 # evaluator.evaluatealgorithm()
 
 def testfunction():
-    okapi_docmatrix = DocMatrix(tups_train, bm25 = True, mmap = False, ngrams_range = (1,1))
+    okapi_docmatrix = DocMatrix(tups_train, bm25 = True, ngrams_range = (1,1))
     query_master = QueryMaster(okapi_docmatrix)
     query_master.evaluatealgorithm(test, 1)
     query_master.evaluatealgorithm(test, 10)
