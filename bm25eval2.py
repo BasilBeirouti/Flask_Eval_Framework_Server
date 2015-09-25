@@ -47,9 +47,9 @@ def testfunction():
     query_master.evaluatealgorithm(test, 1)
     query_master.evaluatealgorithm(test, 10)
 
-cProfile.runctx("testfunction()", globals(), locals())
-# start = time.time()
-# testfunction()
-# stop = time.time()
-# tot = stop - start
-# print(tot)
+# cProfile.runctx("testfunction()", globals(), locals())
+start = time.time()
+testfunction()
+stop = time.time()
+tot = stop - start
+print(tot)

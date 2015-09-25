@@ -39,7 +39,7 @@ class DocMatrix:
         return self._bm_vectobj
 
     def vectorize_content(self, content):
-        print("building docmatrix (DocMatrix.vectorize_content method")
+        print("building docmatrix (DocMatrix.vectorize_content method)")
         start = time.time()
         bm_vectout = self.vectorizer.transform(content)
         docmatrix = numpy.asarray(bm_vectout.toarray())
@@ -82,11 +82,13 @@ class QueryMaster:
 
 
     def similarity(self, current_docmatrix, qvect):
-        start = time.time()
         print("calculating similarity (QueryMaster.similarity method)")
+        start = time.time()
+        print(type(current_docmatrix), type(qvect))
         matrixvectout = numpy.asmatrix(current_docmatrix)
         matrixqvectsout = numpy.asmatrix(qvect)
         print(matrixvectout.shape, matrixqvectsout.shape)
+        #NEED TO OPTIMIZE THIS LINE RIGHT BELOW!!!
         similaritymatrix = numpy.asarray(matrixvectout*matrixqvectsout.T)
         print("calculating similarity took ", time.time()-start, " seconds")
         return similaritymatrix
