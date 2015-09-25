@@ -251,8 +251,12 @@ class QueryMaster:
             return topnindices
 
 def mem_map_save(matrix, name):
-    path = os.path.join(os.getcwd(),"ApplicationData")
+    path = os.path.join(os.getcwd(), "ApplicationData")
     if os.path.exists(path):
-        numpy.save(path + name + ".npy", matrix)
-        matrix = numpy.load(path + name + ".npy", mmap_mode = "r")
+        print("inside")
+        filepath = path + "/" + name
+        print(filepath)
+        numpy.save(filepath, matrix)
+        print("after save")
+        matrix = numpy.load(filepath + ".npy", mmap_mode = "r")
     return matrix
