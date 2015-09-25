@@ -81,21 +81,18 @@ class QueryMaster:
         """
         self.docmatrix_obj = docmatrix_obj
 
-
-    def similarity(self, current_docmatrix, qvect):
-        print("calculating similarity (QueryMaster.similarity method)")
-        start = time.time()
-        matrixvectout = numpy.asmatrix(current_docmatrix)
-        #NEED TO OPTIMIZE THIS LINE RIGHT BELOW!!!
-        similaritymatrix = numpy.asarray(qvect.dot(matrixvectout.T).T)
-        print("calculating similarity took ", time.time()-start, " seconds",  "\n")
-        return similaritymatrix
-
     def queryalgorithm(self, newquery, tsesonshift = None):
         current_docmatrix, recognized_tses = self.docmatrix_obj.onshift_docmatrix(tsesonshift)
         qvect = self.docmatrix_obj.vectorize_content([newquery])
         similaritymatrix = self.similarity(current_docmatrix, qvect)
         return self.toppredictions(similaritymatrix, recognized_tses, similaritymatrix.shape[0])
+
+    def toppredictions(self, similaritymatrix, recognized_tses, n = 1):
+        topnindices = self.maxpoints(similaritymatrix, n)
+        self.name_score = [(recognized_tses[ind], float("{0:.3f}".format(similaritymatrix[ind][0]))) for ind in topnindices]
+        self.name_score.sort(key = operator.itemgetter(1), reverse = True)
+        # print("algorithm predicts ", self.name_score)
+        return self.name_score
 
     def evaluatealgorithm(self, testdata, n):
         testnames, testcontent = zip(*testdata)
@@ -104,13 +101,6 @@ class QueryMaster:
         current_docmatrix, all_tses = self.docmatrix_obj.onshift_docmatrix(None)
         similaritymatrix = self.similarity(current_docmatrix, qvect)
         return self.evaluatepredictions(similaritymatrix, all_tses, testnames, n)
-
-    def toppredictions(self, similaritymatrix, recognized_tses, n = 1):
-        topnindices = self.maxpoints(similaritymatrix, n)
-        self.name_score = [(recognized_tses[ind], float("{0:.3f}".format(similaritymatrix[ind][0]))) for ind in topnindices]
-        self.name_score.sort(key = operator.itemgetter(1), reverse = True)
-        # print("algorithm predicts ", self.name_score)
-        return self.name_score
 
     def evaluatepredictions(self, similaritymatrix, trainnames, actualnames, n):
         if n == 1:
@@ -130,6 +120,15 @@ class QueryMaster:
             print("in top ", str(n), " algorithm achieved ", accuracy , " accuracy")
             print("random achieved ", randaccuracy, " accuracy")
             print(accuracy/randaccuracy, " times better than random! \n")
+
+    def similarity(self, current_docmatrix, qvect):
+        print("calculating similarity (QueryMaster.similarity method)")
+        start = time.time()
+        matrixvectout = numpy.asmatrix(current_docmatrix)
+        #NEED TO OPTIMIZE THIS LINE RIGHT BELOW!!!
+        similaritymatrix = numpy.asarray(qvect.dot(matrixvectout.T).T)
+        print("calculating similarity took ", time.time()-start, " seconds",  "\n")
+        return similaritymatrix
 
     @staticmethod
     def maxpoints(matrix, n):
