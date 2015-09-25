@@ -5,9 +5,6 @@ from BM25 import TF2BM25
 import operator
 import os
 import numpy
-import theano
-from theano import tensor as T
-import gnumpy
 
 class DocMatrix:
 
@@ -88,9 +85,7 @@ class QueryMaster:
         matrixvectout = numpy.asmatrix(current_docmatrix)
         matrixqvectsout = numpy.asmatrix(qvect)
         print(matrixvectout.shape, matrixqvectsout.shape)
-        # similaritymatrix = numpy.asarray(matrixvectout*matrixqvectsout.T)
-        # similaritymatrix = theano.dot(matrixvectout, matrixqvectsout.T)
-        similaritymatrix = gnumpy.dot(matrixvectout, matrixqvectsout.T)
+        similaritymatrix = numpy.asarray(matrixvectout*matrixqvectsout.T)
         return similaritymatrix
 
     def queryalgorithm(self, newquery, tsesonshift = None):
