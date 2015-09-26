@@ -42,7 +42,9 @@ def read_schedule_file(schedule_path):
             schedule = to_datetime(schedule)
         return schedule
 
-def
+def schedule_array2list(schedule_array):
+    return [tuple(row) for row in schedule_array]
+
 def to_datetime(schedule):
     for row in schedule:
         row[0], row[1], row[3], row[5] = int(row[0]), int(row[1]), int(row[3]), int(row[5])
