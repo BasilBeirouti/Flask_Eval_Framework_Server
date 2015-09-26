@@ -7,6 +7,7 @@ schedule_path = os.path.join(os.getcwd(), "ApplicationData","WFM_Schedule_Sep2De
 headers = ['id', 'person_id', 'utc_date', 'mins', 'active_utc_date', 'active_mins']
 headers = dict(enumerate(headers))
 
+def
 
 def npy_from_csv(schedule_path):
     schedule = read_schedule_file(schedule_path)
