@@ -27,7 +27,7 @@ SELECT
   rsr.pers_first_nm as first_name,
   rsr.pers_last_nm as last_name,
   sr.srvc_req_prob_text as problem_description,
-  sr.srvc_req_crte_dt
+  sr.srvc_req_crte_dt as srvc_req_crte_dt
 FROM
   emcas_engr_s360.w_service_request_d as sr,
   emcas_engr_s360.w_resource_role_ref as rsr,
@@ -38,7 +38,28 @@ WHERE
   rsr.pers_11i_id = wpd.pers_11i_id and
   sr.srvc_req_crte_dt > now()::TIMESTAMP - cast(365 || 'days' as INTERVAL)
 ORDER BY
-  SR.srvc_req_crte_dt DESC,
-  sr_owner_person_id
+  sr_owner_person_id,
+  srvc_req_crte_dt DESC
+LIMIT 1000;
+
+
+SELECT
+  DISTINCT sr.srvc_req_num as sr_num,
+  wpd.empl_bdge_num as sr_owner_person_id,
+  rsr.pers_first_nm as first_name,
+  rsr.pers_last_nm as last_name,
+  sr.srvc_req_prob_text as problem_description,
+  sr.srvc_req_crte_dt as srvc_req_crte_dt
+FROM
+  emcas_engr_s360.w_service_request_d as sr,
+  emcas_engr_s360.w_resource_role_ref as rsr,
+  emcas_engr_s360.w_person_d as wpd
+WHERE
+  sr.srvc_req_ownr_rsrc_id = rsr.rsrc_id and
+  wpd.empl_bdge_num = 227020,
+  rsr.pers_11i_id = wpd.pers_11i_id and
+  sr.srvc_req_crte_dt > now()::TIMESTAMP - cast(365 || 'days' as INTERVAL)
+ORDER BY
+  srvc_req_crte_dt DESC
 LIMIT 1000;
 
