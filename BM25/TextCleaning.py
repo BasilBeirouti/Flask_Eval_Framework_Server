@@ -14,6 +14,7 @@ lemmas["nas"] = "nas"
 lemmas["config"] = "configuration"
 lemmas["luns"] = "lun"
 lemmas["commond"] = "command"
+lemmas["vplex"] = "vplex"
 
 
 #lemmatization using NLTK
@@ -69,4 +70,3 @@ def text_scrub(func):
     def wrapped(*args, **kwargs):
         return cleanStringAndLemmatize(func(*args, **kwargs))
     return wrapped
-

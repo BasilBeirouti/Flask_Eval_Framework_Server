@@ -41,7 +41,7 @@ print("grouped problem summaries by TSE")
 # print("running evaluation")
 # evaluator.evaluatealgorithm()
 
-def testfunction():
+def testfunction(tups_train):
     okapi_docmatrix = DocMatrix(tups_train, bm25 = True, ngrams_range = (1,1))
     query_master = QueryMaster(okapi_docmatrix)
     start = time.time()
@@ -53,4 +53,3 @@ def testfunction():
 
 # cProfile.runctx("testfunction()", globals(), locals())
 
-testfunction()
