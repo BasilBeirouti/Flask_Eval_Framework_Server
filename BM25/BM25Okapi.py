@@ -132,7 +132,6 @@ class QueryMaster:
         print("calculating similarity (QueryMaster.similarity method)")
         start = time.time()
         matrixvectout = numpy.asmatrix(current_docmatrix)
-        #NEED TO OPTIMIZE THIS LINE RIGHT BELOW!!!
         similaritymatrix = numpy.asarray(qvect.dot(matrixvectout.T).T)
         print("calculating similarity took ", time.time()-start, " seconds",  "\n")
         return similaritymatrix
