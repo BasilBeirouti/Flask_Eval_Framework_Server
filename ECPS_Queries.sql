@@ -63,6 +63,6 @@ WHERE
   sr.srvc_req_crte_dt > now()::TIMESTAMP - cast(365 || 'days' as INTERVAL)
 ORDER BY
   srvc_req_crte_dt DESC
-LIMIT 100000;
+LIMIT 100;
 
 
