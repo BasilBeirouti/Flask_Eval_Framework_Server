@@ -114,8 +114,18 @@ def on_now(shift):
         return True
     return False
 
+def on_today(shift):
+    start = shift[2] - datetime.timedelta(hours = 12)
+    end = shift[2] + datetime.timedelta(minutes = shift[3] + 12*60)
+    if start < datetime.datetime.today() < end:
+        return True
+    return False
+
 def whos_on(schedule_list):
     return [shift for shift in schedule_list if on_now(shift)]
+
+def whos_on_today(schedule_list):
+    return [shift for shift in schedule_list if on_today(shift)]
 
 borg = BorgConnect()
 @borg.with_connection

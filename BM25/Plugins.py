@@ -2,7 +2,7 @@ __author__ = 'basilbeirouti'
 
 import csv, operator
 from itertools import groupby
-from BM25 import schedule_list, headers, whos_on, last_thousand
+from BM25 import schedule_list, headers, whos_on, whos_on_today, last_thousand
 from BM25.DocIteration import changename
 from BM25.TextCleaning import wordslist2string, cleanStringAndLemmatize
 import csv, os, datetime
@@ -43,7 +43,7 @@ def tuples_tse_psums_concat(alldata):
     return out
 
 def docmatrix_data():
-    onshift_list = whos_on(schedule_list)
+    onshift_list = whos_on_today(schedule_list)
     results = []
     for el in onshift_list:
         results.append(last_thousand(str(el[1]), 3000))
