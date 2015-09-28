@@ -52,4 +52,3 @@ def testfunction(tups_train):
     print(tot)
 
 # cProfile.runctx("testfunction()", globals(), locals())
-

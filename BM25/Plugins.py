@@ -2,7 +2,6 @@ __author__ = 'basilbeirouti'
 
 import csv, operator
 from itertools import groupby
-from BM25 import schedule_list, headers, whos_on, whos_on_today, last_thousand
 from BM25.DocIteration import changename
 from BM25.TextCleaning import wordslist2string, cleanStringAndLemmatize
 import csv, os, datetime
@@ -42,27 +41,10 @@ def tuples_tse_psums_concat(alldata):
     out = [(name[0], " ".join(list(psums))) for name, psums in [zip(*list(group)) for key, group in groupby(alldata, operator.itemgetter(0))]]
     return out
 
-def docmatrix_data():
-    onshift_list = whos_on_today(schedule_list)
-    results = []
-    for el in onshift_list:
-        results.append(last_thousand(str(el[1]), 3000))
-    acc = []
-    for el in results:
-        acc = acc + el
-    return acc
-
 def clean_docmatrix_data(raw_data):
     #lastname_firstname, cleanedproblemsummary
     temp = [(el[3].replace(" ", "") + "_" + el[2].replace(" ", ""), wordslist2string(cleanStringAndLemmatize(el[4]))) for el in raw_data]
     temp.sort(key = operator.itemgetter(0))
     return temp
-
-def process_docmatrix_data(raw_data):
-    #lastname_firstname, cleanedproblemsummary
-    temp = [(el[3].replace(" ", "") + "_" + el[2].replace(" ", ""), el[4]) for el in raw_data]
-    temp.sort(key = operator.itemgetter(0))
-    return temp
-
 
 

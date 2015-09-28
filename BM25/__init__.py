@@ -6,6 +6,8 @@ import numpy as np
 
 headers = ['id', 'person_id', 'utc_date', 'mins', 'active_utc_date', 'active_mins']
 headers = dict(enumerate(headers))
+rawcsvfile = "/Users/basilbeirouti/PycharmProjects/Server/RawData/WFM_Schedule.csv"
+filteredcsvfile = "/Users/basilbeirouti/PycharmProjects/Server/ApplicationData/Schedule.csv"
 
 class BorgConnect:
 
@@ -70,72 +72,16 @@ class BorgConnect:
         # if "conn" in self._shared_state:
         #     self._shared_state["conn"].close()
 
-def npy_from_csv(schedule):
-    wid, person_id, utc_date, mins, active_date, active_mins = zip(*schedule)
-    wid, person_id, utc_date, mins, active_date, active_mins = list(wid), list(person_id), list(utc_date), list(mins), list(active_date), list(active_mins)
-
-    schedule_array = np.zeros((len(schedule),),
-                          dtype = [('row_id', 'uint32'),
-                                   ('person_id', 'uint32'),
-                                   ('utc_date', 'a19'),
-                                   ('mins', 'uint16'),
-                                   ('active_utc_date', 'a19'),
-                                   ('active_mins', 'uint16')])
-    schedule_array['row_id'] = wid
-    schedule_array['person_id'] = person_id
-    schedule_array['utc_date'] = utc_date
-    schedule_array['mins'] = mins
-    schedule_array['active_utc_date'] = active_date
-    schedule_array['active_mins'] = active_mins
-    return schedule_array
-    #u32, u32, str(19), u16, str(19), u16
-
-def schedule_array2list(schedule_array):
-    return [list(row) for row in schedule_array]
-
-def make_datetime(schedule):
-    for row in schedule:
-        row[0], row[1], row[3], row[5] = int(row[0]), int(row[1]), int(row[3]), int(row[5])
-        row[2] = datetime.datetime.strptime(bytes.decode(row[2]), "%Y-%m-%d %H:%M:%S")
-        row[4] = datetime.datetime.strptime(bytes.decode(row[4]), "%Y-%m-%d %H:%M:%S")
-    return schedule
-
-def get_schedule_list():
-    schedule_array = np.load(open("/Users/basilbeirouti/PycharmProjects/Server/ApplicationData/Numpy_Schedule.npy", 'rb'))
-    out = make_datetime(schedule_array2list(schedule_array))
-    return out
-
-schedule_list = get_schedule_list()
-
-def on_now(shift):
-    start = shift[2]
-    end = shift[2] + datetime.timedelta(minutes = shift[3])
-    if start < datetime.datetime.today() < end:
-        return True
-    return False
-
-def on_today(shift):
-    start = shift[2] - datetime.timedelta(hours = 12)
-    end = shift[2] + datetime.timedelta(minutes = shift[3] + 12*60)
-    if start < datetime.datetime.today() < end:
-        return True
-    return False
-
-def whos_on(schedule_list):
-    return [shift for shift in schedule_list if on_now(shift)]
-
-def whos_on_today(schedule_list):
-    return [shift for shift in schedule_list if on_today(shift)]
-
 borg = BorgConnect()
 @borg.with_connection
 def last_thousand(cur, *args, **kwargs):
-    badge_num = args[0]
+    person_id = args[0]
     n = args[1]
     query_last_thousand = """
-        SELECT
+    SELECT
   DISTINCT sr.srvc_req_num as sr_num,
-  wpd.empl_bdge_num as sr_owner_person_id,
+  wpd.empl_bdge_num as sr_owner_bdge_num,
+  rsr.pers_11i_id as person_id,
   rsr.pers_first_nm as first_name,
   rsr.pers_last_nm as last_name,
   sr.srvc_req_prob_text as problem_description,
@@ -146,15 +92,13 @@ FROM
   emcas_engr_s360.w_person_d as wpd
 WHERE
   sr.srvc_req_ownr_rsrc_id = rsr.rsrc_id and
-  wpd.empl_bdge_num =
-  """ + str(badge_num) + """
-  and
+  rsr.empl_bdge_num != 'NA' and
   rsr.pers_11i_id = wpd.pers_11i_id and
+      rsr.pers_11i_id = """ + str(person_id) + """ and
   sr.srvc_req_crte_dt > now()::TIMESTAMP - cast(365 || 'days' as INTERVAL)
 ORDER BY
   srvc_req_crte_dt DESC
-LIMIT
-""" + str(n) + ";"
+  LIMIT """ + str(n) + ";"
     cur.execute(query_last_thousand)
     results = cur.fetchall()
     return results
