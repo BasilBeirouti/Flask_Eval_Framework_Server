@@ -7,6 +7,13 @@ import operator, os, numpy, time
 class DocMatrix:
 
     def __init__(self, data_tuples, vectorizer = None, **kwargs):
+        """
+
+        :param data_tuples: list of tuples (<lastname>_<firstname>, <cleaned concatenated problem summaries>)
+        :param vectorizer: If None, defaults to sklearn CountVectorizer
+        :param kwargs: bm25:boolean if True, applies BM25 Okapi weights to docmatrix
+        :return:
+        """
         trainnames, traincontent = self.unpack_corpus(data_tuples)
         self.tse_dict = self.make_tse_dict(trainnames)
         self.tse_list = trainnames
